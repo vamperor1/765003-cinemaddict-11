@@ -1,7 +1,7 @@
 # Личный проект «Киноман» [![Build status][travis-image]][travis-url]
 
 * Студент: [Сергей Ситдинов](https://up.htmlacademy.ru/ecmascript/11/user/765003).
-* Наставник: `Неизвестно`.
+* Наставник: [Михаил Еланцев](https://up.htmlacademy.ru/ecmascript/11/user/928641).
 
 ---
 

@@ -7,6 +7,7 @@ import FilmCardComponent from "./components/film-card.js";
 import MoreButtonComponent from "./components/load-more-button.js";
 import FooterStatsComponent from "./components/footer-stats.js";
 import FilmDetailsComponent from "./components/film-details.js";
+import NoData from "./components/no-data.js";
 import {generateFilters} from "./mock/filter.js";
 import {generateFilmsInfo} from "./mock/film.js";
 
@@ -72,6 +73,11 @@ const renderFilmCard = (filmsListContainer, film) => {
 // Отрисует все карточки (в цикл передается функция по отрисовке одной краточки renderFilmCard), а также
 // кнопку "Еще" и добавит её логику.
 const renderFilmList = () => {
+  if (films.length === 0) {
+    render(siteMainElement, new NoData().getElement(), renderPosition.BEFOREEND);
+    return;
+  }
+
   let showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
 
   const filmsListComponent = new FilmsListComponent();

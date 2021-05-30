@@ -1,4 +1,4 @@
-import {getRandomArrayItems, getRandomInRange} from "../utils.js";
+import {getRandomArrayItems, getRandomInRange} from "../utils/common.js";
 import {
   FILMS_TITLES,
   FILMS_POSTERS,

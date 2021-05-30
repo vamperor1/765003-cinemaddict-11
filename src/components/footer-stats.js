@@ -1,5 +1,5 @@
-import {getRandomInRange} from "../utils.js";
-import {createElement} from "../utils.js";
+import {getRandomInRange} from "../utils/common.js";
+import AbstractComponent from "./abstract-component.js";
 
 const createFooterStatsTemplate = () => {
   const filmsAmount = getRandomInRange(1, 999) + 130000;
@@ -9,24 +9,8 @@ const createFooterStatsTemplate = () => {
   );
 };
 
-export default class FooterStats {
-  constructor() {
-    this._element = null;
-  }
-
+export default class FooterStats extends AbstractComponent {
   getTemplate() {
     return createFooterStatsTemplate();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

@@ -1,8 +1,3 @@
-export const renderPosition = {
-  AFTEREND: `afterend`,
-  BEFOREEND: `beforeend`
-};
-
 export const getRandomInRange = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
@@ -32,22 +27,4 @@ export const getRandomDate = () => {
 
 export const castDateFormat = (value) => {
   return value < 10 ? `0${value}` : String(value);
-};
-
-export const createElement = (template) => {
-  const newElement = document.createElement(`div`);
-  newElement.innerHTML = template;
-
-  return newElement.firstChild;
-};
-
-export const render = (container, element, place) => {
-  switch (place) {
-    case renderPosition.AFTEREND:
-      container.after(element);
-      break;
-    case renderPosition.BEFOREEND:
-      container.append(element);
-      break;
-  }
 };

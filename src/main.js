@@ -1,7 +1,6 @@
 import {render, renderPosition} from "./utils/render.js";
 import ProfileComponent from "./components/profile.js";
 import SiteMenuComponent from "./components/site-menu.js";
-import SortMenuComponent from "./components/sort-menu.js";
 import FilmsBoardComponent from "./components/films-board.js";
 import FooterStatsComponent from "./components/footer-stats.js";
 import FilmsBoardController from "./controllers/board.js";
@@ -20,8 +19,6 @@ const films = generateFilmsInfo(FILMS_COUNT);
 render(siteHeaderElement, new ProfileComponent(), renderPosition.BEFOREEND);
 
 render(siteMainElement, new SiteMenuComponent(filters), renderPosition.BEFOREEND);
-
-render(siteMainElement, new SortMenuComponent(), renderPosition.BEFOREEND);
 
 const filmsBoardComponent = new FilmsBoardComponent();
 const filmsBoardController = new FilmsBoardController(filmsBoardComponent);

@@ -1,58 +1,23 @@
 import {render, renderPosition, remove} from "../utils/render.js";
-import FilmCardComponent from "../components/film-card.js";
 import FilmsListComponent from "../components/films-list.js";
 import FilmsListTopComponent from "../components/films-top.js";
 import FilmsListCommentedComponent from "../components/films-commented.js";
 import MoreButtonComponent from "../components/load-more-button.js";
-import FilmDetailsComponent from "../components/film-details.js";
 import NoDataComponent from "../components/no-data.js";
+import FilmCardController from "./card.js";
 import SortMenuComponent, {SortType} from "../components/sort-menu.js";
 
 const SHOWING_FILMS_COUNT_ON_START = 5;
 const SHOWING_FILMS_COUNT_BY_BUTTON = 5;
 const EXTRA_FILMS_COUNT = 2;
 
-const siteBodyElement = document.querySelector(`body`);
-let filmDetailsShowed = {};
+const renderFilmsCards = (filmListElement, films, onDataChange, onViewChange) => {
+  return films.map((film) => {
+    const filmCardController = new FilmCardController(filmListElement, onDataChange, onViewChange);
 
-const renderFilmCard = (filmsListContainer, film) => {
-  const filmCardComponent = new FilmCardComponent(film);
+    filmCardController.render(film);
 
-  render(filmsListContainer, filmCardComponent, renderPosition.BEFOREEND);
-
-  const onFilmCardClick = () => {
-    const filmDetailsComponent = new FilmDetailsComponent(film);
-
-    const onDetailsCloseBtnClick = () => {
-      document.removeEventListener(`keydown`, onEscPress);
-      remove(filmDetailsShowed);
-    };
-
-    const onEscPress = (keyEvt) => {
-      if (keyEvt.code === `Escape`) {
-        onDetailsCloseBtnClick();
-      }
-    };
-
-    document.addEventListener(`keydown`, onEscPress);
-
-    if (filmDetailsShowed._element) {
-      onDetailsCloseBtnClick();
-    }
-
-    render(siteBodyElement, filmDetailsComponent, renderPosition.BEFOREEND);
-
-    filmDetailsShowed = filmDetailsComponent;
-
-    filmDetailsShowed.setCloseHandler(onDetailsCloseBtnClick);
-  };
-
-  filmCardComponent.setClickHandler(onFilmCardClick);
-};
-
-const renderFilms = (filmListElement, films) => {
-  films.forEach((film) => {
-    renderFilmCard(filmListElement, film);
+    return filmCardController;
   });
 };
 
@@ -78,35 +43,28 @@ export default class FilmsBoardController {
   constructor(container) {
     this._container = container;
 
+    this._films = [];
+    this._showedFilmCardControllers = [];
+    this._showedTopFilmsCardsControllers = [];
+    this._showedCommentedFilmsCardsControllers = [];
+    this._showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
+
     this._noDataComponent = new NoDataComponent();
     this._sortMenuComponent = new SortMenuComponent();
     this._filmsListComponent = new FilmsListComponent();
     this._filmsTopListComponent = new FilmsListTopComponent();
     this._filmsCommentedListComponent = new FilmsListCommentedComponent();
     this._moreButtonComponent = new MoreButtonComponent();
+
+    this._onDataChange = this._onDataChange.bind(this);
+    this._onSortTypeChange = this._onSortTypeChange.bind(this);
+    this._onViewChange = this._onViewChange.bind(this);
+
+    this._sortMenuComponent.setSortTypeChangeHandler(this._onSortTypeChange);
   }
 
   render(films) {
-    const renderMoreButton = () => {
-      if (showingFilmsCount >= films.length) {
-        return;
-      }
-
-      render(filmsListContainer, this._moreButtonComponent, renderPosition.AFTEREND);
-
-      this._moreButtonComponent.setClickHandler(() => {
-        const prevFilmsCount = showingFilmsCount;
-        showingFilmsCount = showingFilmsCount + SHOWING_FILMS_COUNT_BY_BUTTON;
-
-        const sortedFilms = getSortedFilms(films, this._sortMenuComponent.getSortType(), prevFilmsCount, showingFilmsCount);
-
-        renderFilms(filmsListContainer, sortedFilms);
-
-        if (showingFilmsCount >= films.length) {
-          remove(this._moreButtonComponent);
-        }
-      });
-    };
+    this._films = films;
 
     const container = this._container.getElement();
 
@@ -125,26 +83,77 @@ export default class FilmsBoardController {
     const filmsTopListContainer = this._filmsTopListComponent.getElement().querySelector(`.films-list__container`);
     const filmsCommentedListContainer = this._filmsCommentedListComponent.getElement().querySelector(`.films-list__container`);
 
-    let showingFilmsCount = SHOWING_FILMS_COUNT_ON_START;
+    const newFilmsCards = renderFilmsCards(filmsListContainer, this._films.slice(0, this._showingFilmsCount), this._onDataChange, this._onViewChange);
+    this._showedFilmCardControllers = this._showedFilmCardControllers.concat(newFilmsCards);
 
-    renderFilms(filmsListContainer, films.slice(0, showingFilmsCount));
-    renderFilms(filmsTopListContainer, films.slice(0, EXTRA_FILMS_COUNT));
-    renderFilms(filmsCommentedListContainer, films.slice(0, EXTRA_FILMS_COUNT));
+    const newTopFilmsCards = renderFilmsCards(filmsTopListContainer, films.slice(0, EXTRA_FILMS_COUNT), this._onDataChange, this._onViewChange);
+    const newCommentedFilmsCards = renderFilmsCards(filmsCommentedListContainer, films.slice(0, EXTRA_FILMS_COUNT), this._onDataChange, this._onViewChange);
 
-    renderMoreButton();
+    this._showedTopFilmsCardsControllers = this._showedTopFilmsCardsControllers.concat(newTopFilmsCards);
+    this._showedCommentedFilmsCardsControllers = this._showedCommentedFilmsCardsControllers.concat(newCommentedFilmsCards);
 
-    this._sortMenuComponent.setSortTypeChangeHandler((sortType) => {
-      showingFilmsCount = SHOWING_FILMS_COUNT_BY_BUTTON;
+    // this._showedFilmCardControllers = this._showedFilmCardControllers.concat(newFilmsCards, newTopFilmsCards, newCommentedFilmsCards);
 
-      const sortedFilms = getSortedFilms(films, sortType, 0, showingFilmsCount);
+    this._renderMoreButton();
+  }
 
-      filmsListContainer.innerHTML = ``;
+  _onDataChange(filmCardController, oldData, newData) {
+    // вырезает из массива фильмов фильм, на котором кликнули по кнопке,
+    // и вставляет его с изменными данными обратно
+    const index = this._films.findIndex((it) => it === oldData);
 
-      renderFilms(filmsListContainer, sortedFilms);
+    if (index === -1) {
+      return;
+    }
 
-      if (!this._moreButtonComponent._element) {
-        renderMoreButton();
+    this._films = [].concat(this._films.slice(0, index), newData, this._films.slice(index + 1));
+
+    filmCardController.render(this._films[index]);
+  }
+
+  _renderMoreButton() {
+    if (this._showingFilmsCount >= this._films.length) {
+      return;
+    }
+
+    const filmsListContainer = this._filmsListComponent.getElement().querySelector(`.films-list__container`);
+
+    render(filmsListContainer, this._moreButtonComponent, renderPosition.AFTEREND);
+
+    this._moreButtonComponent.setClickHandler(() => {
+      const prevFilmsCount = this._showingFilmsCount;
+      this._showingFilmsCount = this._showingFilmsCount + SHOWING_FILMS_COUNT_BY_BUTTON;
+
+      const sortedFilms = getSortedFilms(this._films, this._sortMenuComponent.getSortType(), prevFilmsCount, this._showingFilmsCount);
+      const newFilmsCards = renderFilmsCards(filmsListContainer, sortedFilms, this._onDataChange, this._onViewChange);
+
+      this._showedFilmCardControllers = this._showedFilmCardControllers.concat(newFilmsCards);
+
+      if (this._showingFilmsCount >= this._films.length) {
+        remove(this._moreButtonComponent);
       }
     });
+  }
+
+  _onSortTypeChange(sortType) {
+    this._showingFilmsCount = SHOWING_FILMS_COUNT_BY_BUTTON;
+
+    const sortedFilms = getSortedFilms(this._films, sortType, 0, this._showingFilmsCount);
+    const filmsListContainer = this._filmsListComponent.getElement().querySelector(`.films-list__container`);
+
+    filmsListContainer.innerHTML = ``;
+
+    const newFilmsCards = renderFilmsCards(filmsListContainer, sortedFilms, this._onDataChange, this._onViewChange);
+    this._showedFilmCardControllers = newFilmsCards;
+
+    if (!this._moreButtonComponent._element) {
+      this._renderMoreButton();
+    }
+  }
+
+  _onViewChange() {
+    this._showedFilmCardControllers.forEach((it) => it.setDefaultView());
+    this._showedTopFilmsCardsControllers.forEach((it) => it.setDefaultView());
+    this._showedCommentedFilmsCardsControllers.forEach((it) => it.setDefaultView());
   }
 }

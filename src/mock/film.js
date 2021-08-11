@@ -42,6 +42,12 @@ const generateFilmInfo = () => {
       },
       'runtime': getRandomInRange(71, 115),
       'genre': getRandomArrayItems(getRandomInRange(1, 3), GENRES)
+    },
+    "user_details": {
+      "watchlist": false,
+      "already_watched": false,
+      "watching_date": new Date(`2021`, getRandomInRange(0, 11), getRandomInRange(1, 28)),
+      "favorite": false
     }
   };
 };

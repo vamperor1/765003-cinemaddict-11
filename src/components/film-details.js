@@ -1,8 +1,9 @@
 import {MONTH_NAMES} from "../const.js";
 import {castDateFormat} from "../utils/common.js";
-import AbstractComponent from "./abstract-component.js";
+// import AbstractComponent from "./abstract-component.js";
+import AbstractSmartComponent from "./abstract-smart-component.js";
 
-const createFilmDetailsTemplate = (film) => {
+const createFilmDetailsTemplate = (film, newCommentEmoji) => {
   const {
     comments,
     film_info: {
@@ -20,9 +21,16 @@ const createFilmDetailsTemplate = (film) => {
       genre,
       poster,
       age_rating: ageRating,
-      description
+      description,
+    },
+    user_details: {
+      watchlist,
+      already_watched: watched,
+      favorite
     }
   } = film;
+
+  // const newCommentEmoji = this._newCommentEmoji;
 
   const createGenreTemplate = () => {
     return genre.map((it) => `<span class="film-details__genre">${it}</span>`).join(`\n`);
@@ -52,6 +60,14 @@ const createFilmDetailsTemplate = (film) => {
   const createCommentsTemplate = () => {
     return comments.map((it) => createCommentMarkup(it)).join(`\n`);
   };
+
+  // const createNewCommentEmojiTemplate = (emoji = false) => {
+  //   return (
+  //     `<div for="add-emoji" class="film-details__add-emoji-label">
+  //     ${emoji ? `` : `<img src="images/emoji/${emoji}.png" width="55" height="55" alt="emoji-${emoji}">`}
+  //     </div>`
+  //   );
+  // };
 
   return (
     `<section class="film-details">
@@ -119,13 +135,13 @@ const createFilmDetailsTemplate = (film) => {
           </div>
 
           <section class="film-details__controls">
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist">
+            <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${watchlist ? `checked` : ``}>
             <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched">
+            <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" ${watched ? `checked` : ``}>
             <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
-            <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite">
+            <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite" ${favorite ? `checked` : ``}>
             <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
           </section>
         </div>
@@ -139,7 +155,9 @@ const createFilmDetailsTemplate = (film) => {
             </ul>
 
             <div class="film-details__new-comment">
-              <div for="add-emoji" class="film-details__add-emoji-label"></div>
+              <div for="add-emoji" class="film-details__add-emoji-label">
+              ${newCommentEmoji ? `<img src="images/emoji/${newCommentEmoji}.png" width="55" height="55" alt="emoji-${newCommentEmoji}">` : ``}
+              </div>
 
               <label class="film-details__comment-label">
                 <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
@@ -174,18 +192,94 @@ const createFilmDetailsTemplate = (film) => {
   );
 };
 
-export default class FilmDetails extends AbstractComponent {
+export default class FilmDetails extends AbstractSmartComponent {
   constructor(film) {
     super();
     this._film = film;
+
+    this._closeHandler = null;
+    this._watchlistButtonClickHandler = null;
+    this._watchedButtonClickHandler = null;
+    this._favoritesButtonClickHandler = null;
+    this._newCommentEmoji = null;
+
+    this._subscribeOnEvents();
   }
 
   getTemplate() {
-    return createFilmDetailsTemplate(this._film);
+    return createFilmDetailsTemplate(this._film, this._newCommentEmoji);
+  }
+
+  recoveryListeners() {
+    this.setCloseHandler(this._closeHandler);
+    this.setWatchlistButtonClickHandler(this._watchlistButtonClickHandler);
+    this.setWatchedButtonClickHandler(this._watchedButtonClickHandler);
+    this.setFavoritesButtonClickHandler(this._favoritesButtonClickHandler);
+    this._subscribeOnEvents();
+  }
+
+  rerender() {
+    super.rerender();
   }
 
   setCloseHandler(handler) {
     this.getElement().querySelector(`.film-details__close-btn`)
     .addEventListener(`click`, handler);
+
+    this._closeHandler = handler;
+  }
+
+  setWatchlistButtonClickHandler(handler) {
+    this.getElement().querySelector(`.film-details__control-label--watchlist`)
+      .addEventListener(`click`, handler);
+
+    this._watchlistButtonClickHandler = handler;
+  }
+
+  setWatchedButtonClickHandler(handler) {
+    this.getElement().querySelector(`.film-details__control-label--watched`)
+      .addEventListener(`click`, handler);
+
+    this._watchedButtonClickHandler = handler;
+  }
+
+  setFavoritesButtonClickHandler(handler) {
+    this.getElement().querySelector(`.film-details__control-label--favorite`)
+      .addEventListener(`click`, handler);
+
+    this._favoritesButtonClickHandler = handler;
+  }
+
+  _subscribeOnEvents() {
+    const element = this.getElement();
+
+    element.querySelector(`#emoji-smile`)
+      .addEventListener(`click`, () => {
+        this._newCommentEmoji = `smile`;
+
+        this.rerender();
+      });
+
+    element.querySelector(`#emoji-sleeping`)
+      .addEventListener(`click`, () => {
+        this._newCommentEmoji = `sleeping`;
+
+        this.rerender();
+      });
+
+    element.querySelector(`#emoji-puke`)
+    .addEventListener(`click`, () => {
+      this._newCommentEmoji = `puke`;
+
+      this.rerender();
+    });
+
+    element.querySelector(`#emoji-angry`)
+    .addEventListener(`click`, () => {
+      this._newCommentEmoji = `angry`;
+
+      this.rerender();
+
+    });
   }
 }

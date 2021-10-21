@@ -1,7 +1,7 @@
-import {MONTH_NAMES} from "../const.js";
-import {castDateFormat} from "../utils/common.js";
-// import AbstractComponent from "./abstract-component.js";
+// import {MONTH_NAMES} from "../const.js";
+// import {castDateFormat} from "../utils/common.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
+import {formatFilmRuntime, formatFilmReleaseDate, formatCommentDateRelative} from "../utils/common.js";
 
 const createFilmDetailsTemplate = (film, newCommentEmoji) => {
   const {
@@ -48,7 +48,7 @@ const createFilmDetailsTemplate = (film, newCommentEmoji) => {
           <p class="film-details__comment-info">
             <span class="film-details__comment-author">${author}</span>
             <span class="film-details__comment-day">
-              ${date.getFullYear()}/${castDateFormat(date.getMonth())}/${castDateFormat(date.getDate())} ${castDateFormat(date.getHours())}:${castDateFormat(date.getMinutes())}
+              ${formatCommentDateRelative(date)}
             </span>
             <button class="film-details__comment-delete">Delete</button>
           </p>
@@ -110,18 +110,18 @@ const createFilmDetailsTemplate = (film, newCommentEmoji) => {
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Release Date</td>
-                  <td class="film-details__cell">${releaseDate.getDate()} ${MONTH_NAMES[releaseDate.getMonth()]} ${releaseDate.getFullYear()}</td>
+                  <td class="film-details__cell">${formatFilmReleaseDate(releaseDate)}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Runtime</td>
-                  <td class="film-details__cell">${Math.floor(runtime / 60)}h ${runtime % 60}m</td>
+                  <td class="film-details__cell">${formatFilmRuntime(runtime)}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Country</td>
                   <td class="film-details__cell">${releaseCountry}</td>
                 </tr>
                 <tr class="film-details__row">
-                  <td class="film-details__term">Genres</td>
+                  <td class="film-details__term">${genre.length > 1 ? `Genres` : `Genre`}</td>
                   <td class="film-details__cell">
                     ${createGenreTemplate()}
                   </td>
@@ -250,36 +250,42 @@ export default class FilmDetails extends AbstractSmartComponent {
     this._favoritesButtonClickHandler = handler;
   }
 
+  _onEmojiChange(emoji) {
+    const oldDetailsScroll = this.getElement().scrollTop;
+    this._newCommentEmoji = emoji;
+    this.rerender();
+    this.getElement().scrollTop = oldDetailsScroll;
+  }
+
   _subscribeOnEvents() {
     const element = this.getElement();
 
     element.querySelector(`#emoji-smile`)
       .addEventListener(`click`, () => {
-        this._newCommentEmoji = `smile`;
-
-        this.rerender();
+        this._onEmojiChange(`smile`);
       });
 
     element.querySelector(`#emoji-sleeping`)
       .addEventListener(`click`, () => {
-        this._newCommentEmoji = `sleeping`;
-
-        this.rerender();
+        this._onEmojiChange(`sleeping`);
       });
 
     element.querySelector(`#emoji-puke`)
     .addEventListener(`click`, () => {
-      this._newCommentEmoji = `puke`;
-
-      this.rerender();
+      this._onEmojiChange(`puke`);
     });
 
     element.querySelector(`#emoji-angry`)
     .addEventListener(`click`, () => {
-      this._newCommentEmoji = `angry`;
-
-      this.rerender();
-
+      this._onEmojiChange(`angry`);
     });
   }
 }
+
+/* <td class="film-details__cell">${releaseDate.getDate()} ${MONTH_NAMES[releaseDate.getMonth()]} ${releaseDate.getFullYear()}</td> */
+
+/* <td class="film-details__cell">${Math.floor(runtime / 60)}h ${runtime % 60}m</td> */
+
+/* <span class="film-details__comment-day">
+  ${date.getFullYear()}/${castDateFormat(date.getMonth())}/${castDateFormat(date.getDate())} ${castDateFormat(date.getHours())}:${castDateFormat(date.getMinutes())}
+</span> */

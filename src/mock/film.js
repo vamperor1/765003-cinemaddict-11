@@ -11,6 +11,7 @@ import {
   AGE_RATINGS
 } from "../const.js";
 import {generateComments} from "../mock/comments.js";
+import CommentsModel from "../models/comments";
 
 // const DESCRIPTION_LIMIT = 140;
 
@@ -23,8 +24,14 @@ import {generateComments} from "../mock/comments.js";
 // };
 
 const generateFilmInfo = () => {
+  const commentsModel = new CommentsModel();
+  commentsModel.setComments(generateComments(getRandomInRange(1, 5)));
+  const comments = commentsModel.getComments();
+  // console.log(commentsModel.getComments());
   return {
-    'comments': generateComments(getRandomInRange(1, 5)),
+    'id': String(new Date() + Math.random()),
+    // 'comments': generateComments(getRandomInRange(1, 5)),
+    'comments': comments,
     'film_info': {
       'title': getRandomArrayItems(1, FILMS_TITLES).join(),
       'description': getRandomArrayItems(getRandomInRange(1, 5), FILM_DISCRIPTIONS).join(` `),

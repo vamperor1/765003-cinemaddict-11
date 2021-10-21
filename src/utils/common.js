@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export const getRandomInRange = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
@@ -25,6 +27,27 @@ export const getRandomDate = () => {
   return targetDate;
 };
 
-export const castDateFormat = (value) => {
-  return value < 10 ? `0${value}` : String(value);
+// export const castDateFormat = (value) => {
+//   return value < 10 ? `0${value}` : String(value);
+// };
+
+export const formatFilmRuntime = (runtime) => {
+  const filmRuntime = moment.duration(runtime, `minutes`);
+  return `${Math.floor(filmRuntime.asHours())}h ${filmRuntime.minutes()}m`;
+};
+
+export const formatFilmReleaseYear = (date) => {
+  return moment(date).format(`YYYY`);
+};
+
+export const formatFilmReleaseDate = (date) => {
+  return moment(date).format(`DD MMMM YYYY`);
+};
+
+export const formatCommentDate = (date) => {
+  return moment(date).format(`YYYY/MM/DD HH:mm`);
+};
+
+export const formatCommentDateRelative = (date) => {
+  return moment(date).fromNow();
 };

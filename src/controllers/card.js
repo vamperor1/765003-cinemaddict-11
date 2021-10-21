@@ -1,7 +1,8 @@
-import {render, renderPosition, remove} from "../utils/render.js";
+import {render, renderPosition, remove, replace} from "../utils/render.js";
 import FilmCardComponent from "../components/film-card.js";
 import FilmDetailsComponent from "../components/film-details.js";
 
+export const EmptyComment = {};
 export default class FilmCardController {
   constructor(container, onDataChange, onViewChange) {
     this._container = container;
@@ -24,32 +25,46 @@ export default class FilmCardController {
   }
 
   render(film) {
+    const oldFilmCardComponent = this._filmCardComponent;
+    // const oldFilmDetailsComponent = this._filmDetailsComponent;
+
     this._film = film;
     this._filmCardComponent = new FilmCardComponent(film);
 
+    /* Устанавливает обработчик клика по карточке фильма.
+    33 - закрывает все открытые попапы с инфой о фильме, если есть открытые
+    34 - открывает попап с инфой о фильме */
     this._filmCardComponent.setClickHandler(() => {
       this._onViewChange();
       this._renderFilmDetails();
       document.addEventListener(`keydown`, this._onEscKeyDown);
     });
 
-    // this._filmDetailsComponent.setCloseHandler(() => {
-    //   this._detailsCloseHandler();
-    // });
-
-    this._filmCardComponent.setWatchlistButtonClickHandler(() => {
+    /* Меняем данные с false на true и наоборот при нажатии на кнопки добавления/удаления в списки фильмов */
+    this._filmCardComponent.setWatchlistButtonClickHandler((evt) => {
+      evt.preventDefault();
       this._changeFilmUserDetails(`watchlist`);
     });
 
-    this._filmCardComponent.setWatchedButtonClickHandler(() => {
+    this._filmCardComponent.setWatchedButtonClickHandler((evt) => {
+      evt.preventDefault();
       this._changeFilmUserDetails(`already_watched`);
     });
 
-    this._filmCardComponent.setFavoritesButtonClickHandler(() => {
+    this._filmCardComponent.setFavoritesButtonClickHandler((evt) => {
+      evt.preventDefault();
       this._changeFilmUserDetails(`favorite`);
     });
+    /* ^ */
 
-    render(this._container, this._filmCardComponent, renderPosition.BEFOREEND);
+    if (oldFilmCardComponent) {
+      replace(this._filmCardComponent, oldFilmCardComponent);
+      // replace(this._filmDetailsComponent, oldFilmDetailsComponent);
+    } else {
+      render(this._container, this._filmCardComponent, renderPosition.BEFOREEND);
+    }
+
+    // render(this._container, this._filmCardComponent, renderPosition.BEFOREEND);
   }
 
   _renderFilmDetails() {
@@ -57,6 +72,7 @@ export default class FilmCardController {
 
     render(this._bodyElement, this._filmDetailsComponent, renderPosition.BEFOREEND);
 
+    /* Меняем данные с false на true и наоборот при нажатии на кнопки добавления/удаления в списки фильмов */
     this._filmDetailsComponent.setWatchlistButtonClickHandler(() => {
       this._changeFilmUserDetails(`watchlist`);
     });
@@ -68,6 +84,7 @@ export default class FilmCardController {
     this._filmDetailsComponent.setFavoritesButtonClickHandler(() => {
       this._changeFilmUserDetails(`favorite`);
     });
+    /* ^ */
 
     this._filmDetailsComponent.setCloseHandler(() => {
       this._detailsCloseHandler();
@@ -92,4 +109,14 @@ export default class FilmCardController {
       this._detailsCloseHandler();
     }
   }
+
+  destroy() {
+    remove(this._filmCardComponent);
+    if (this._filmDetailsComponent) {
+      remove(this._filmDetailsComponent);
+    }
+    document.removeEventListener(`keydown`, this._onEscKeyDown);
+  }
 }
+
+

@@ -1,4 +1,5 @@
 import moment from "moment";
+import {RatingLevel} from "../const";
 
 export const getRandomInRange = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -50,4 +51,18 @@ export const formatCommentDate = (date) => {
 
 export const formatCommentDateRelative = (date) => {
   return moment(date).fromNow();
+};
+
+export const getRating = (filmsWatched) => {
+  const filmsQuantity = filmsWatched.filter((film) => film.user_details.already_watched).length;
+
+  if (filmsQuantity > 0 && filmsQuantity <= 10) {
+    return RatingLevel.NOVICE;
+  } else if (filmsQuantity > 10 && filmsQuantity <= 20) {
+    return RatingLevel.FAN;
+  } else if (filmsQuantity >= 21) {
+    return RatingLevel.MOVIEBUFF;
+  }
+
+  return ``;
 };

@@ -36,7 +36,9 @@ export default class FilterMenu extends AbstractComponent {
   }
 
   setFilterChangeHandler(handler) {
-    this.getElement().addEventListener(`click`, (evt) => {
+    this.getElement().
+    querySelector(`.main-navigation__items`).
+    addEventListener(`click`, (evt) => {
       evt.preventDefault();
       const target = evt.target.closest(`a`);
       if (target) {

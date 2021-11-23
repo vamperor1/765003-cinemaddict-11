@@ -67,10 +67,23 @@ export default class FilmsBoardController {
     this._filmsModel.setFilterChangeHandler(this._onFilterChange);
   }
 
+  hide() {
+    this._container.hide();
+    this._sortMenuComponent.hide();
+  }
+
+  show() {
+    this._container.show();
+    this._sortMenuComponent.show();
+    this._sortMenuComponent.setDefaultActiveState();
+  }
+
+  getSortMenuComponent() {
+    return this._sortMenuComponent;
+  }
+
   render() {
-    // this._films = films;
     const films = this._filmsModel.getFilms();
-    // console.log(films);
 
     const container = this._container.getElement();
 

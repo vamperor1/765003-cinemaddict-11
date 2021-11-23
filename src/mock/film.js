@@ -52,7 +52,8 @@ const generateFilmInfo = () => {
     },
     "user_details": {
       "watchlist": false,
-      "already_watched": false,
+      // "already_watched": false,
+      "already_watched": Math.floor(Math.random() * 10) > 5 ? true : false,
       "watching_date": new Date(`2021`, getRandomInRange(0, 11), getRandomInRange(1, 28)),
       "favorite": false
     }

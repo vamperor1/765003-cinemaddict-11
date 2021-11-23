@@ -25,6 +25,7 @@ export default class FilmCardController {
   }
 
   render(film) {
+    // console.log(film.user_details.watching_date);
     const oldFilmCardComponent = this._filmCardComponent;
     // const oldFilmDetailsComponent = this._filmDetailsComponent;
 

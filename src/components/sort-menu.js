@@ -1,4 +1,5 @@
-import AbstractComponent from "./abstract-component.js";
+// import AbstractComponent from "./abstract-component.js";
+import AbstractSmartComponent from "./abstract-smart-component.js";
 
 export const SortType = {
   BY_DATE: `by-date`,
@@ -15,7 +16,7 @@ const createSortMemuTemplate = () => {
     </ul>`
   );
 };
-export default class SortMenu extends AbstractComponent {
+export default class SortMenu extends AbstractSmartComponent {
   constructor() {
     super();
 
@@ -40,6 +41,10 @@ export default class SortMenu extends AbstractComponent {
 
       const sortType = evt.target.dataset.sortType;
 
+      this._clearActiveState();
+
+      evt.target.classList.add(`sort__button--active`);
+
       if (this._currenSortType === sortType) {
         return;
       }
@@ -49,4 +54,20 @@ export default class SortMenu extends AbstractComponent {
       handler(this._currenSortType);
     });
   }
+
+  setDefaultActiveState() {
+    this._currenSortType = SortType.DEFAULT;
+    this._clearActiveState();
+    this.getElement().querySelector(`.sort__button`).classList.add(`sort__button--active`);
+  }
+
+  _clearActiveState() {
+    this.getElement().querySelectorAll(`.sort__button`).forEach((button) => {
+      button.classList.remove(`sort__button--active`);
+    });
+  }
+
+  // sortTypeReset() {
+  //   this._currenSortType = SortType.DEFAULT;
+  // }
 }

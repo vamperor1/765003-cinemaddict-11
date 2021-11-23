@@ -81,3 +81,17 @@ export const FilterType = {
   HISTORY: `history`,
   FAVORITES: `favorites`
 };
+
+export const RatingLevel = {
+  NOVICE: `Novice`,
+  FAN: `Fan`,
+  MOVIEBUFF: `Movie Buff`,
+};
+
+export const StatisticsFilter = {
+  ALL_TIME: `all-time`,
+  TODAY: `today`,
+  WEEK: `week`,
+  MONTH: `month`,
+  YEAR: `year`,
+};
